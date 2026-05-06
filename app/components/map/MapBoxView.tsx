@@ -26,6 +26,9 @@ export function MapBoxView({
   const watchRef = useRef<number | null>(null);
   const manualPickingRef = useRef(manualPicking);
 
+  // ✅ التحكم بالفوكس (مرة واحدة فقط)
+  const hasCenteredRef = useRef(false);
+
   const [selected, setSelected] = useState<{
     lat: number;
     lng: number;
@@ -62,7 +65,7 @@ export function MapBoxView({
       .addTo(map);
 
     /**
-     * GPS Tracking (بدون تحريك الماب)
+     * GPS Tracking
      */
     watchRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -71,8 +74,13 @@ export function MapBoxView({
 
         setAccuracy(pos.coords.accuracy || 0);
 
-        // ✅ فقط تحديث الماركر بدون تحريك الخريطة
         gpsMarkerRef.current?.setLngLat([lng, lat]);
+
+        // ✅ فوكس مرة واحدة فقط
+        if (!hasCenteredRef.current) {
+          map.easeTo({ center: [lng, lat], zoom: 16 });
+          hasCenteredRef.current = true;
+        }
       },
       console.error,
       { enableHighAccuracy: true },
@@ -114,9 +122,9 @@ export function MapBoxView({
     });
 
     return () => {
-      if (watchRef.current)
+      if (watchRef.current) {
         navigator.geolocation.clearWatch(watchRef.current);
-
+      }
       map.remove();
     };
   }, []);
