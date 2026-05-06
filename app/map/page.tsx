@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { Button } from "@mantine/core";
 import { MapBoxView } from "../components/map/MapBoxView";
@@ -16,7 +16,19 @@ export default function MapPage() {
 
   const [accuracy, setAccuracy] = useState<number | "">("");
   const [altitude, setAltitude] = useState<number | "">("");
-
+ const [data, setData] = useState<any[]>([]);
+   async function load() {
+     const res = await fetch("/api/collection-areas");
+     setData(await res.json());
+   }
+ 
+   useEffect(() => {
+     load();
+   }, []);
+ const areas = data.map((item) => ({
+  label: item.name,
+  value: item.name,
+}));
   function handleManualSelect() {
     setOpened(false);
     setManualPicking(true);
@@ -82,14 +94,15 @@ export default function MapPage() {
         </Button>
       )}
 
-      <BinFormDrawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        lat={lat}
-        lng={lng}
-        accuracy={accuracy}
-        altitude={altitude}
-      />
+     <BinFormDrawer
+  opened={opened}
+  onClose={() => setOpened(false)}
+  lat={lat}
+  lng={lng}
+  accuracy={accuracy}
+  altitude={altitude}
+  areas={areas} // ✅ هون
+/>
     </div>
   );
 }

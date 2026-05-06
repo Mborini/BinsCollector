@@ -14,7 +14,7 @@ interface CreateBinPayload {
   sidewalkStatus?: string;
   streetWidth?: string;
   isHotspot?: string;
-
+area?:string;
   notes?: string;
   image?: File | null;
 }
@@ -35,6 +35,7 @@ export async function createBin(data: CreateBinPayload) {
     }
 
     if (data.wasteType) formData.append("wasteType", data.wasteType);
+    if (data.area) formData.append("area", data.area);
     if (data.binStatus) formData.append("binStatus", data.binStatus);
     if (data.binCapacity) formData.append("binCapacity", data.binCapacity);
     if (data.fillLevel) formData.append("fillLevel", data.fillLevel);

@@ -21,6 +21,7 @@ interface Props {
   lng: number;
   accuracy: number | "";
   altitude: number | "";
+  areas: { label: string; value: string }[]; // ✅ مهم
 }
 
 export function BinFormDrawer({
@@ -30,6 +31,7 @@ export function BinFormDrawer({
   lng,
   accuracy,
   altitude,
+  areas,
 }: Props) {
   const [wasteType, setWasteType] = useState<string | null>(null);
   const [binStatus, setBinStatus] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export function BinFormDrawer({
   const [image, setImage] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [area, setArea] = useState<string | null>(null);
   const resetForm = () => {
     setWasteType(null);
     setBinStatus(null);
@@ -76,6 +78,7 @@ export function BinFormDrawer({
         streetWidth: streetWidth || undefined,
         isHotspot: isHotspot || undefined,
 
+        area: area || undefined,
         notes,
         image,
       });
@@ -109,11 +112,11 @@ export function BinFormDrawer({
     };
 
     localStorage.setItem("bin-form-draft", JSON.stringify(draft));
-   
   };
 
   return (
     <Drawer
+      dir="rtl"
       opened={opened}
       onClose={onClose}
       position="bottom"
@@ -134,36 +137,32 @@ export function BinFormDrawer({
           <TextInput size="sm" label="خط الطول" value={lng} readOnly />
         </Group>
 
-        <TextInput
-          size="sm"
-          label="الارتفاع (متر)"
-          value={altitude}
-          readOnly
-        />
+        <TextInput size="sm" label="الارتفاع (متر)" value={altitude} readOnly />
 
-        <TextInput
-          size="sm"
-          label="الدقة (متر)"
-          value={accuracy}
-          readOnly
-        />
-
+        <TextInput size="sm" label="الدقة (متر)" value={accuracy} readOnly />
         <Select
+        required
+          dir="rtl"
+          size="sm"
+          label="المنطقة"
+          value={area}
+          onChange={setArea}
+          data={areas}
+          searchable
+          nothingFoundMessage="لا يوجد نتائج"
+          clearable
+        />
+
+        <Select required
           size="sm"
           label="نوع النفايات"
           value={wasteType}
           onChange={setWasteType}
-          data={[
-            "سكني",
-            "تجاري",
-            "صناعي",
-            "مؤسسات حكومية",
-            "استخدام مختلط",
-          ]}
+          data={["سكني", "تجاري", "صناعي", "مؤسسات حكومية", "استخدام مختلط"]}
           clearable
         />
 
-        <Select
+        <Select required
           size="sm"
           label="حالة الحاوية"
           value={binStatus}
@@ -172,7 +171,7 @@ export function BinFormDrawer({
           clearable
         />
 
-        <Select
+        <Select required
           size="sm"
           label="سعة الحاوية"
           value={binCapacity}
@@ -181,7 +180,7 @@ export function BinFormDrawer({
           clearable
         />
 
-        <Select
+        <Select required
           size="sm"
           label="نسبة الامتلاء"
           value={fillLevel}
@@ -190,7 +189,7 @@ export function BinFormDrawer({
           clearable
         />
 
-        <Select
+        <Select required
           size="sm"
           label="نوع الشارع"
           value={streetType}
@@ -199,7 +198,7 @@ export function BinFormDrawer({
           clearable
         />
 
-        <Select
+        <Select required
           size="sm"
           label="حالة الرصيف"
           value={sidewalkStatus}
@@ -209,6 +208,7 @@ export function BinFormDrawer({
         />
 
         <Select
+        required
           size="sm"
           label="عرض الشارع (متر)"
           value={streetWidth}
@@ -218,6 +218,7 @@ export function BinFormDrawer({
         />
 
         <Select
+        required
           size="sm"
           label="نقطة نفايات ساخنة؟"
           value={isHotspot}

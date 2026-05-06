@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
 
     const accuracy = formData.get("accuracy");
     const altitude = formData.get("altitude");
+    const area = formData.get("area");
 
     const wasteType = formData.get("wasteType");
     const binStatus = formData.get("binStatus");
@@ -68,14 +69,14 @@ export async function POST(req: NextRequest) {
         waste_type, bin_status, bin_capacity,
         fill_level, street_type, sidewalk_status,
         street_width, is_hotspot,
-        notes, image_url
+        notes, image_url,area
       )
       VALUES (
         $1,$2,$3,$4,
         $5,$6,$7,
         $8,$9,$10,
         $11,$12,
-        $13,$14
+        $13,$14,$15
       )
       RETURNING *;
       `,
@@ -94,6 +95,7 @@ export async function POST(req: NextRequest) {
         isHotspotValue,
         notes,
         imageUrl,
+        area,
       ]
     );
 
