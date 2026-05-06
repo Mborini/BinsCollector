@@ -32,21 +32,19 @@ export default function MapPage() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setAccuracy(
-          position.coords.accuracy
-            ? +position.coords.accuracy.toFixed(2)
-            : ""
+          position.coords.accuracy ? +position.coords.accuracy.toFixed(2) : "",
         );
 
         setAltitude(
           position.coords.altitude !== null
             ? +position.coords.altitude.toFixed(2)
-            : ""
+            : "",
         );
       },
       () => {
         setAccuracy("");
         setAltitude("");
-      }
+      },
     );
 
     setManualPicking(false);
@@ -80,7 +78,7 @@ export default function MapPage() {
             transform: "translateX(-50%)",
           }}
         >
-          اختر الموقع
+          اضافة موقع حاوية{" "}
         </Button>
       )}
 

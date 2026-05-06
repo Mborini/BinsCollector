@@ -22,7 +22,6 @@ export function MapBoxView({
 
   const gpsMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const accuracyCircleRef = useRef<string>("accuracy-circle");
 
   const watchRef = useRef<number | null>(null);
   const manualPickingRef = useRef(manualPicking);
@@ -63,7 +62,7 @@ export function MapBoxView({
       .addTo(map);
 
     /**
-     * GPS Tracking
+     * GPS Tracking (بدون تحريك الماب)
      */
     watchRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -72,11 +71,8 @@ export function MapBoxView({
 
         setAccuracy(pos.coords.accuracy || 0);
 
+        // ✅ فقط تحديث الماركر بدون تحريك الخريطة
         gpsMarkerRef.current?.setLngLat([lng, lat]);
-
-        if (!manualPickingRef.current) {
-          map.easeTo({ center: [lng, lat], zoom: 16 });
-        }
       },
       console.error,
       { enableHighAccuracy: true },
@@ -98,9 +94,6 @@ export function MapBoxView({
           .setLngLat([lng, lat])
           .addTo(map);
 
-        /**
-         * 🟢 DRAG
-         */
         selectedMarkerRef.current.on("dragend", () => {
           const pos = selectedMarkerRef.current!.getLngLat();
 
@@ -121,22 +114,21 @@ export function MapBoxView({
     });
 
     return () => {
-      if (watchRef.current) navigator.geolocation.clearWatch(watchRef.current);
+      if (watchRef.current)
+        navigator.geolocation.clearWatch(watchRef.current);
 
       map.remove();
     };
   }, []);
 
   /**
-   * 🔵 رسم دائرة الدقة
+   * دائرة الدقة
    */
   const updateAccuracyCircle = (
     map: mapboxgl.Map,
     lng: number,
     lat: number,
   ) => {
-    const radius = accuracy;
-
     const circleGeoJSON = {
       type: "Feature",
       geometry: {
@@ -159,7 +151,7 @@ export function MapBoxView({
         type: "circle",
         source: "accuracy",
         paint: {
-          "circle-radius": radius,
+          "circle-radius": accuracy,
           "circle-color": "#3b82f6",
           "circle-opacity": 0.2,
         },
@@ -168,11 +160,10 @@ export function MapBoxView({
   };
 
   /**
-   * 📍 CONFIRM
+   * تأكيد الموقع
    */
   const handleConfirm = () => {
     if (!selected) return;
-
     onConfirmLocation(selected.lat, selected.lng);
   };
 
