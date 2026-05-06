@@ -151,7 +151,7 @@ export function MapBoxView({
     } else {
       map.addSource("accuracy", {
         type: "geojson",
-        data: circleGeoJSON,
+       
       });
 
       map.addLayer({
