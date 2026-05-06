@@ -5,9 +5,10 @@ import {
   Group,
   Text,
   ActionIcon,
-  Box,
+  Card,
+  useMantineTheme,
 } from "@mantine/core";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconMapPin } from "@tabler/icons-react";
 
 type Row = {
   id: number;
@@ -21,19 +22,28 @@ interface Props {
   onDelete: (id: number) => void;
 }
 
-export function CollectionTable({ data, onEdit, onDelete }: Props) {
+export function CollectionTable({ data, onEdit }: Props) {
+  const theme = useMantineTheme();
+
   return (
-    <Box maw={750} mx="auto">
+    <Card
+      radius="xl"
+      shadow="sm"
+      p="md"
+      style={{
+        border: `1px solid ${theme.colors.gray[2]}`,
+      }}
+    >
       <Table
         highlightOnHover
-        verticalSpacing="xs"
-        horizontalSpacing="sm"
+        verticalSpacing="sm"
+        horizontalSpacing="md"
       >
         <Table.Thead>
           <Table.Tr>
             <Table.Th>ID</Table.Th>
-            <Table.Th>Name</Table.Th>
-            <Table.Th >Created</Table.Th>
+            <Table.Th>المنطقة</Table.Th>
+            <Table.Th>تاريخ الإنشاء</Table.Th>
             <Table.Th />
           </Table.Tr>
         </Table.Thead>
@@ -43,11 +53,16 @@ export function CollectionTable({ data, onEdit, onDelete }: Props) {
             <Table.Tr key={row.id}>
               <Table.Td>
                 <Text size="xs" c="dimmed">
-                  {row.id}
+                  #{row.id}
                 </Text>
               </Table.Td>
 
-              <Table.Td>{row.name}</Table.Td>
+              <Table.Td>
+                <Group gap={6}>
+                  <IconMapPin size={16} color={theme.colors.green[6]} />
+                  <Text fw={500}>{row.name}</Text>
+                </Group>
+              </Table.Td>
 
               <Table.Td>
                 <Text size="sm" c="dimmed">
@@ -58,20 +73,12 @@ export function CollectionTable({ data, onEdit, onDelete }: Props) {
               <Table.Td>
                 <Group gap={4} justify="flex-end">
                   <ActionIcon
-                    size="sm"
-                    variant="subtle"
+                    variant="light"
+                    color="blue"
+                    radius="xl"
                     onClick={() => onEdit(row)}
                   >
-                    <IconEdit size={14} />
-                  </ActionIcon>
-
-                  <ActionIcon
-                    size="sm"
-                    variant="subtle"
-                    color="red"
-                    onClick={() => onDelete(row.id)}
-                  >
-                    <IconTrash size={14} />
+                    <IconEdit size={16} />
                   </ActionIcon>
                 </Group>
               </Table.Td>
@@ -79,6 +86,6 @@ export function CollectionTable({ data, onEdit, onDelete }: Props) {
           ))}
         </Table.Tbody>
       </Table>
-    </Box>
+    </Card>
   );
 }

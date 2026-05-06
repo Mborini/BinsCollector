@@ -245,16 +245,9 @@ export function BinFormDrawer({
         />
 
         <Group grow>
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleSaveDraft}
-            disabled={loading}
-          >
-            حفظ كمسودة
-          </Button>
+         
 
-          <Button size="sm" onClick={handleSubmit} loading={loading}>
+          <Button color="green" size="sm" onClick={handleSubmit} loading={loading}>
             إرسال
           </Button>
         </Group>

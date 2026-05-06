@@ -7,8 +7,9 @@ import {
   Group,
   Stack,
   Title,
-  Paper,
   Container,
+  Badge,
+  Text,
 } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -49,31 +50,49 @@ export default function ManageAreas() {
   }
 
   return (
-    <Container mt={25} size="md">
+    <Container size="lg" py={{ base: "md", md: "xl" }}>
       <Stack gap="lg">
         {/* Header */}
-        <Group justify="space-between">
-          <Title order={3}>Collection Areas</Title>
+        <Group justify="center">
+          <Badge color="green" size="lg" radius="xl">
+            إدارة المناطق
+          </Badge>
+        </Group>
 
+        <Title
+          ta="center"
+          style={{
+            fontSize: "clamp(20px, 4vw, 30px)",
+            fontWeight: 700,
+          }}
+        >
+          إدارة مناطق جمع النفايات
+        </Title>
+
+        <Text ta="center" c="dimmed" maw={500} mx="auto">
+          يمكنك إضافة وتعديل مناطق جمع الحاويات بكل سهولة
+        </Text>
+
+        <Group justify="flex-end">
           <Button
             leftSection={<IconPlus size={16} />}
+            radius="xl"
+            color="green"
             onClick={() => setOpen(true)}
           >
-            Add Area
+            إضافة منطقة
           </Button>
         </Group>
 
         {/* Table */}
-        <Paper withBorder radius="md" p="md">
-          <CollectionTable
-            data={data}
-            onEdit={(row) => {
-              setEdit(row);
-              setOpen(true);
-            }}
-            onDelete={remove}
-          />
-        </Paper>
+        <CollectionTable
+          data={data}
+          onEdit={(row) => {
+            setEdit(row);
+            setOpen(true);
+          }}
+          onDelete={remove}
+        />
       </Stack>
 
       {/* Drawer */}

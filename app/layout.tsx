@@ -21,6 +21,7 @@ import {
   IconDeviceDesktopAnalytics,
   IconSettings,
   IconMap,
+  IconFileTypeXls 
 } from "@tabler/icons-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -28,10 +29,10 @@ import { usePathname } from "next/navigation";
 
 const mainLinks = [
   { icon: IconHome2, label: "Home", href: "/" },
-  { icon: IconGauge, label: "Dashboard", href: "/dashboard" },
+ 
   { icon: IconDeviceDesktopAnalytics, label: "Collection Areas", href: "/collection-areas/manage" },
   { icon: IconMap, label: "Map", href: "/map" },
-  { icon: IconSettings, label: "Settings", href: "/settings" },
+  { icon: IconFileTypeXls , label: "Data Collections ", href: "/export-bins" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

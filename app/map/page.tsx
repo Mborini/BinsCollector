@@ -27,7 +27,7 @@ export default function MapPage() {
    }, []);
  const areas = data.map((item) => ({
   label: item.name,
-  value: item.name,
+  value: item.id,
 }));
   function handleManualSelect() {
     setOpened(false);
