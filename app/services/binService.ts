@@ -17,6 +17,7 @@ interface CreateBinPayload {
 area?:string;
   notes?: string;
   image?: File | null;
+  binsCount?:number | null;
 }
 
 export async function createBin(data: CreateBinPayload) {
@@ -35,6 +36,7 @@ export async function createBin(data: CreateBinPayload) {
     }
 
     if (data.wasteType) formData.append("wasteType", data.wasteType);
+    if (data.binsCount !== undefined && data.binsCount !== null) formData.append("binsCount", data.binsCount.toString());
     if (data.area) formData.append("area", data.area);
     if (data.binStatus) formData.append("binStatus", data.binStatus);
     if (data.binCapacity) formData.append("binCapacity", data.binCapacity);

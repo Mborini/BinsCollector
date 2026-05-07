@@ -7,13 +7,10 @@ export async function GET(req: Request) {
   const areaId = searchParams.get("area");
 
   if (!areaId) {
-    return NextResponse.json(
-      { error: "area مطلوب" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "area مطلوب" }, { status: 400 });
   }
-const { rows } = await pool.query(
-  `
+  const { rows } = await pool.query(
+    `
   SELECT 
     bins.id,
     bins.lat,
@@ -27,10 +24,11 @@ const { rows } = await pool.query(
     bins.street_type,
     bins.sidewalk_status,
     bins.street_width,
-    bins.is_hotspot,
+    bins.is_hotspot,bins.bins_Count,
     bins.notes,
     bins.image_url,
     bins.created_at,
+    
     collection_areas.name AS area_name
   FROM bins
   INNER JOIN collection_areas
@@ -39,8 +37,8 @@ const { rows } = await pool.query(
 ORDER BY bins.id ASC
 
   `,
-  [areaId]
-);
+    [areaId],
+  );
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
@@ -60,4 +58,3 @@ ORDER BY bins.id ASC
     },
   });
 }
-
