@@ -194,6 +194,7 @@ export function BinFormDrawer({
         />
 
         <SegmentedControl
+        
           value={binStatus || ""}
           onChange={setBinStatus}
           data={["جيدة", "تحتاج صيانة", "سيئة / تحتاج استبدال"]}

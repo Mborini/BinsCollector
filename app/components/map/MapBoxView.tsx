@@ -19,7 +19,6 @@ export function MapBoxView({
   onConfirmLocation,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-
   const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const manualPickingRef = useRef(manualPicking);
 
@@ -44,28 +43,38 @@ export function MapBoxView({
 
     mapRefExternal.current = map;
 
-    // ✅ أزرار الزوم
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // ✅ زر الموقع (Mapbox الرسمي)
+    // ✅ Geolocate (الدائرة الأصلية)
     const geolocate = new mapboxgl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-      trackUserLocation: false, // ✅ مرة واحدة فقط (مهم)
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true, // ✅ live دائم
       showUserHeading: true,
     });
 
     map.addControl(geolocate, "top-right");
 
-    // ✅ تشغيله تلقائي (كأنه مكبوس)
+    // ✅ تشغيل تلقائي عند فتح الماب
     map.on("load", () => {
       geolocate.trigger();
     });
 
-    /**
-     * Click لاختيار موقع
-     */
+    // ✅ منع الماب من التحرك (إلغاء الـ auto focus)
+    map.on("movestart", (e) => {
+      // إذا الحركة مش من المستخدم → أوقفها
+      if (!e.originalEvent) {
+        map.stop();
+      }
+    });
+
+    // ✅ إذا حاول يوقف التتبع → رجعه Live
+    geolocate.on("trackuserlocationend", () => {
+      setTimeout(() => {
+        geolocate.trigger();
+      }, 500);
+    });
+
+    // ✅ اختيار موقع يدوي
     map.on("click", (e) => {
       if (!manualPickingRef.current) return;
 
@@ -75,6 +84,7 @@ export function MapBoxView({
       if (!selectedMarkerRef.current) {
         selectedMarkerRef.current = new mapboxgl.Marker({
           draggable: true,
+          color: "#e03131",
         })
           .setLngLat([lng, lat])
           .addTo(map);
@@ -83,8 +93,8 @@ export function MapBoxView({
           const pos = selectedMarkerRef.current!.getLngLat();
 
           setSelected({
-            lat: pos.lat,
-            lng: pos.lng,
+            lat: +pos.lat.toFixed(6),
+            lng: +pos.lng.toFixed(6),
           });
         });
       } else {
@@ -99,9 +109,6 @@ export function MapBoxView({
     };
   }, []);
 
-  /**
-   * تأكيد الموقع
-   */
   const handleConfirm = () => {
     if (!selected) return;
     onConfirmLocation(selected.lat, selected.lng);
@@ -109,45 +116,53 @@ export function MapBoxView({
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
-      {manualPicking && selected && (
+      {manualPicking && (
         <div
-          
           style={{
             position: "absolute",
             top: 20,
             left: "50%",
             transform: "translateX(-50%)",
-            padding: "12px 20px",
-            background: "black",
+            padding: "12px 18px",
+            background: "rgba(0,0,0,0.75)",
             color: "#fff",
-            borderRadius: 10,
-            border: "none",
-            fontWeight: "bold",
+            borderRadius: 14,
             zIndex: 20,
+            fontSize: 14,
           }}
         >
-المس الخريطة للتحديد        </div>
+          👆 اضغط على الخريطة لتحديد الموقع
+        </div>
       )}
-      <div ref={containerRef} style={{ height: "100%" }} />
+
+      <div
+        ref={containerRef}
+        style={{
+          height: "100%",
+          cursor: manualPicking ? "crosshair" : "grab",
+        }}
+      />
 
       {manualPicking && selected && (
         <button
           onClick={handleConfirm}
           style={{
             position: "absolute",
-            bottom: 20,
+            bottom: 25,
             left: "50%",
             transform: "translateX(-50%)",
-            padding: "12px 20px",
+            padding: "14px 28px",
             background: "#2f9e44",
             color: "#fff",
-            borderRadius: 10,
+            borderRadius: 30,
             border: "none",
             fontWeight: "bold",
+            fontSize: 16,
             zIndex: 20,
+            cursor: "pointer",
           }}
         >
-          تأكيد الموقع
+          ✅ تأكيد الموقع
         </button>
       )}
     </div>

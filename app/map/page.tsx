@@ -81,18 +81,25 @@ export default function MapPage() {
       />
 
       {!manualPicking && (
-        <Button
-          onClick={handleManualSelect}
-          
-          style={{
-            position: "absolute",
-            bottom: 45,
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-           حدد موقع
-        </Button>
+       <Button
+  size="lg"
+  radius="xl"
+  color="blue"
+  onClick={handleManualSelect}
+  style={{
+    position: "absolute",
+    bottom: 45,
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 10,
+    padding: "14px 26px",
+    fontSize: 16,
+    fontWeight: 600,
+    boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+  }}
+>
+  📍 حدد موقع
+</Button>
       )}
 
      <BinFormDrawer
