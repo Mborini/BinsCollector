@@ -149,6 +149,7 @@ export function BinFormDrawer({
 
   return (
     <Drawer
+    
       dir="rtl"
       opened={opened}
       onClose={onClose}
@@ -157,7 +158,7 @@ export function BinFormDrawer({
       title="نموذج بيانات الحاوية"
       overlayProps={{ opacity: 0.55, blur: 2 }}
     >
-      <Stack gap="xs">
+      <Stack px={18} gap="xs">
         <Group grow>
           <TextInput size="xs" label="خط العرض" value={lat} readOnly />
           <TextInput size="xs" label="خط الطول" value={lng} readOnly />
