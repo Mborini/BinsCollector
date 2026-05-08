@@ -56,12 +56,27 @@ export default function MapPage() {
 
       if (isNaN(lat) || isNaN(lng)) return;
 
-      const el = document.createElement("img");
-      el.src = "/recycling-bin.png";
-      el.style.width = "35px";
-      el.style.height = "35px";
-      el.style.objectFit = "contain";
+   const el = document.createElement("div");
+el.style.display = "flex";
+el.style.flexDirection = "column";
+el.style.alignItems = "center";
 
+// صورة الحاوية
+const img = document.createElement("img");
+img.src = "/recycling-bin.png";
+img.style.width = "35px";
+img.style.height = "35px";
+
+// النص (capacity)
+const label = document.createElement("span");
+label.innerText = `${bin.bin_capacity ?? ""}`;
+label.style.fontSize = "12px";
+label.style.color = "#000";
+
+
+// إضافة العناصر
+el.appendChild(img);
+el.appendChild(label);
       const marker = new mapboxgl.Marker(el, {
         anchor: "bottom",
       })
