@@ -159,16 +159,12 @@ export function BinFormDrawer({
           <TextInput size="xs" label="الدقة (متر)" value={accuracy} readOnly />
         </Group>
         {/* ✅ محسن - أسرع فتح */}
-        <Select
-        size="xs"
-          label="المنطقة"
-          value={area}
+        <Input.Label size="xs">المنطقة</Input.Label>
+        <SegmentedControl
+          size="xs"
+          value={area || ""}
           onChange={setArea}
           data={areas}
-          searchable
-          
-          
-          clearable
         />
 
         <NumberInput
