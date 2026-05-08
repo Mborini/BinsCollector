@@ -177,9 +177,8 @@ export default function MapPage() {
         position="left"
       >
         <ActionIcon
-          size={45}
-          radius="xl"
-          variant="filled"
+          size={35}
+          variant="light"
           color={showingBins ? "red" : "blue"}
           onClick={() => {
             if (showingBins) {
@@ -192,7 +191,7 @@ export default function MapPage() {
           }}
           style={{
             position: "absolute",
-            top: 150,
+            top: 155,
             right: 10,
             zIndex: 20,
           }}
