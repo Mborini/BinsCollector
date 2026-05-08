@@ -29,6 +29,8 @@ interface Props {
   accuracy: number | "";
   altitude: number | "";
   areas: { label: string; value: string }[];
+
+  onCreated?: (lat: number, lng: number) => void; // ✅ هذا الجديد
 }
 
 export function BinFormDrawer({
@@ -39,6 +41,9 @@ export function BinFormDrawer({
   accuracy,
   altitude,
   areas,
+  
+  onCreated 
+
 }: Props) {
   const [wasteType, setWasteType] = useState<string | null>(null);
   const [binStatus, setBinStatus] = useState<string | null>(null);
@@ -114,13 +119,13 @@ export function BinFormDrawer({
         notes,
         image,
       });
+      onCreated?.(lat, lng);
 
       notifications.show({
         title: "تم",
         message: "تم إرسال البيانات بنجاح ✅",
         color: "green",
       });
-
       // ✅ حفظ آخر إدخال
       localStorage.setItem(
         "last-bin-data",

@@ -2,12 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-import { Button } from "@mantine/core";
+import { ActionIcon, Button, Tooltip } from "@mantine/core";
 import { MapBoxView } from "../components/map/MapBoxView";
 import { BinFormDrawer } from "../components/map/LocationDrawer";
+import { IconTrash, IconTrashOff } from "@tabler/icons-react";
 
 export default function MapPage() {
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const binsMarkersRef = useRef<mapboxgl.Marker[]>([]);
+
+  const [bins, setBins] = useState<any[]>([]);
+  const [showingBins, setShowingBins] = useState(false);
 
   const [lat, setLat] = useState(31.95);
   const [lng, setLng] = useState(35.91);
@@ -16,48 +21,85 @@ export default function MapPage() {
 
   const [accuracy, setAccuracy] = useState<number | "">("");
   const [altitude, setAltitude] = useState<number | "">("");
- const [data, setData] = useState<any[]>([]);
-   async function load() {
-     const res = await fetch("/api/collection-areas");
-     setData(await res.json());
-   }
- 
-   useEffect(() => {
-     load();
-   }, []);
- const areas = data.map((item) => ({
-  label: item.name,
-  value: item.id,
-}));
+
+  const [data, setData] = useState<any[]>([]);
+
+  async function load() {
+    const res = await fetch("/api/collection-areas");
+    setData(await res.json());
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const areas = data.map((item) => ({
+    label: item.name,
+    value: item.id,
+  }));
+
   function handleManualSelect() {
     setOpened(false);
     setManualPicking(true);
   }
 
-  /**
-   * ✅ الجديد (بدل onMapPick)
-   */
+  // ✅ رسم كل الحاويات من state
+  const showBins = () => {
+    if (!mapRef.current) return;
+
+    binsMarkersRef.current.forEach((m) => m.remove());
+    binsMarkersRef.current = [];
+
+    bins.forEach((bin: any) => {
+      const lat = parseFloat(bin.lat);
+      const lng = parseFloat(bin.lng);
+
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const el = document.createElement("img");
+      el.src = "/recycling-bin.png";
+      el.style.width = "35px";
+      el.style.height = "35px";
+      el.style.objectFit = "contain";
+
+      const marker = new mapboxgl.Marker(el, {
+        anchor: "bottom",
+      })
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current!);
+
+      binsMarkersRef.current.push(marker);
+    });
+  };
+
+  // ✅ إخفاء
+  const hideBins = () => {
+    binsMarkersRef.current.forEach((m) => m.remove());
+    binsMarkersRef.current = [];
+  };
+
+  // ✅ إضافة marker واحد بعد الحفظ
+  const addSingleMarker = (lat: number, lng: number) => {
+    if (!mapRef.current) return;
+
+    const el = document.createElement("img");
+    el.src = "/recycling-bin.png";
+    el.style.width = "35px";
+    el.style.height = "35px";
+
+    const marker = new mapboxgl.Marker(el, {
+      anchor: "bottom",
+    })
+      .setLngLat([lng, lat])
+      .addTo(mapRef.current!);
+
+    binsMarkersRef.current.push(marker);
+  };
+
+  // ✅ تأكيد الموقع
   const handleConfirmLocation = (lat: number, lng: number) => {
     setLat(lat);
     setLng(lng);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setAccuracy(
-          position.coords.accuracy ? +position.coords.accuracy.toFixed(2) : "",
-        );
-
-        setAltitude(
-          position.coords.altitude !== null
-            ? +position.coords.altitude.toFixed(2)
-            : "",
-        );
-      },
-      () => {
-        setAccuracy("");
-        setAltitude("");
-      },
-    );
 
     setManualPicking(false);
 
@@ -65,6 +107,26 @@ export default function MapPage() {
       setOpened(true);
     }, 200);
   };
+
+  // ✅ تحميل البيانات أول مرة
+  useEffect(() => {
+    const loadBins = async () => {
+      const res = await fetch("/api/bins");
+      const data = await res.json();
+
+      setBins(data);
+      setShowingBins(true); // ✅ عرض تلقائي
+    };
+
+    loadBins();
+  }, []);
+
+  // ✅ رسم تلقائي
+  useEffect(() => {
+    if (bins.length > 0 && showingBins) {
+      showBins();
+    }
+  }, [bins]);
 
   return (
     <div
@@ -77,40 +139,67 @@ export default function MapPage() {
       <MapBoxView
         mapRefExternal={mapRef}
         manualPicking={manualPicking}
-        onConfirmLocation={handleConfirmLocation} // ✅ المهم
+        onConfirmLocation={handleConfirmLocation}
       />
 
       {!manualPicking && (
-       <Button
-  size="lg"
-  radius="xl"
-  color="blue"
-  onClick={handleManualSelect}
-  style={{
-    position: "absolute",
-    bottom: 45,
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: 10,
-    padding: "14px 26px",
-    fontSize: 16,
-    fontWeight: 600,
-    boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
-  }}
->
-  📍 حدد موقع
-</Button>
+        <Button
+          size="lg"
+          radius="xl"
+          color="blue"
+          onClick={handleManualSelect}
+          style={{
+            position: "absolute",
+            bottom: 45,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+          }}
+        >
+          📍 حدد موقع
+        </Button>
       )}
 
-     <BinFormDrawer
-  opened={opened}
-  onClose={() => setOpened(false)}
-  lat={lat}
-  lng={lng}
-  accuracy={accuracy}
-  altitude={altitude}
-  areas={areas} // ✅ هون
-/>
+      <BinFormDrawer
+        opened={opened}
+        onClose={() => setOpened(false)}
+        lat={lat}
+        lng={lng}
+        accuracy={accuracy}
+        altitude={altitude}
+        areas={areas}
+        onCreated={addSingleMarker} // ✅ مهم
+      />
+
+      {/* ✅ زر toggle */}
+      <Tooltip
+        label={showingBins ? "إخفاء الحاويات" : "عرض الحاويات"}
+        position="left"
+      >
+        <ActionIcon
+          size={45}
+          radius="xl"
+          variant="filled"
+          color={showingBins ? "red" : "blue"}
+          onClick={() => {
+            if (showingBins) {
+              hideBins();
+              setShowingBins(false);
+            } else {
+              showBins();
+              setShowingBins(true);
+            }
+          }}
+          style={{
+            position: "absolute",
+            top: 150,
+            right: 10,
+            zIndex: 20,
+          }}
+        >
+          {showingBins ? <IconTrashOff /> : <IconTrash />}
+        </ActionIcon>
+      </Tooltip>
     </div>
   );
 }

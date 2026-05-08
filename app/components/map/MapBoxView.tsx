@@ -173,6 +173,13 @@ export function MapBoxView({
     if (!selected) return;
     onConfirmLocation(selected.lat, selected.lng);
   };
+useEffect(() => {
+  if (!manualPicking && selectedMarkerRef.current) {
+    selectedMarkerRef.current.remove(); // ✅ احذف الأحمر
+    selectedMarkerRef.current = null;
+    setSelected(null);
+  }
+}, [manualPicking]);
 
   return (
     <div style={{ position: "relative", height: "100%" }}>

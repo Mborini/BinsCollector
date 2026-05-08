@@ -113,3 +113,19 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+export async function GET() {
+  try {
+    const result = await pool.query(`
+      SELECT lat, lng FROM bins
+    `);
+
+    return NextResponse.json(result.rows);
+  } catch (error) {
+    console.error("GET BINS ERROR:", error);
+
+    return NextResponse.json(
+      { message: "Failed to fetch bins" },
+      { status: 500 }
+    );
+  }
+}
