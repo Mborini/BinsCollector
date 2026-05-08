@@ -166,8 +166,8 @@ export function BinFormDrawer({
           onChange={setArea}
           data={areas}
           searchable
-          limit={10}
-          maxDropdownHeight={200}
+          
+          
           clearable
         />
 
