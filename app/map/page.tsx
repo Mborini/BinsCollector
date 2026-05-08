@@ -83,14 +83,15 @@ export default function MapPage() {
       {!manualPicking && (
         <Button
           onClick={handleManualSelect}
+          
           style={{
             position: "absolute",
-            bottom: 24,
+            bottom: 45,
             left: "50%",
             transform: "translateX(-50%)",
           }}
         >
-          اضافة موقع حاوية{" "}
+           حدد موقع
         </Button>
       )}
 

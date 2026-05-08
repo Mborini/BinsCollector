@@ -109,6 +109,25 @@ export function MapBoxView({
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
+      {manualPicking && selected && (
+        <div
+          
+          style={{
+            position: "absolute",
+            top: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            padding: "12px 20px",
+            background: "black",
+            color: "#fff",
+            borderRadius: 10,
+            border: "none",
+            fontWeight: "bold",
+            zIndex: 20,
+          }}
+        >
+المس الخريطة للتحديد        </div>
+      )}
       <div ref={containerRef} style={{ height: "100%" }} />
 
       {manualPicking && selected && (

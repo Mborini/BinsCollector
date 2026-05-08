@@ -74,6 +74,7 @@ export function BinFormDrawer({
     setSidewalkStatus(null);
     setStreetWidth(null);
     setIsHotspot(null);
+    setArea(null);
     setImage(null);
     setNotes("");
     setBinsCount(1);
@@ -159,7 +160,7 @@ export function BinFormDrawer({
           <TextInput size="xs" label="الدقة (متر)" value={accuracy} readOnly />
         </Group>
         {/* ✅ محسن - أسرع فتح */}
-        <Input.Label size="xs">المنطقة</Input.Label>
+        <Title order={6}>المنطقة</Title>
         <SegmentedControl
           size="xs"
           value={area || ""}
