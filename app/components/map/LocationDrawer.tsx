@@ -13,10 +13,11 @@ import {
   Title,
   SegmentedControl,
   Badge,
+  Input,
   NumberInput,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   opened: boolean;
@@ -37,50 +38,45 @@ export function BinFormDrawer({
   altitude,
   areas,
 }: Props) {
-  const [form, setForm] = useState<any>({
-    wasteType: "",
-    binStatus: "",
-    binCapacity: "",
-    fillLevel: "",
-    streetType: "",
-    sidewalkStatus: "",
-    streetWidth: "",
-    isHotspot: "",
-    area: "",
-    binsCount: 1,
-    notes: "",
-    image: null,
-  });
+  const [wasteType, setWasteType] = useState<string | null>(null);
+  const [binStatus, setBinStatus] = useState<string | null>(null);
+  const [binCapacity, setBinCapacity] = useState<string | null>(null);
+  const [fillLevel, setFillLevel] = useState<string | null>(null);
+  const [streetType, setStreetType] = useState<string | null>(null);
+  const [sidewalkStatus, setSidewalkStatus] = useState<string | null>(null);
+  const [streetWidth, setStreetWidth] = useState<string | null>(null);
+  const [isHotspot, setIsHotspot] = useState<string | null>(null);
 
+  const [image, setImage] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [area, setArea] = useState<string | null>(null);
+  const [binsCount, setBinsCount] = useState<number>(1);
 
-  // ✅ تثبيت البيانات (Performance)
-  const options = useMemo(
-    () => ({
-      waste: ["سكني", "تجاري", "صناعي", "مؤسسات حكومية", "استخدام مختلط"],
-      status: ["جيدة", "تحتاج صيانة", "سيئة / تحتاج استبدال"],
-      capacity: ["120 لتر", "240 لتر", "770 لتر", "1100 لتر"],
-      fill: ["أكثر من 100%", "100%", "50%", "أقل من 50%"],
-      street: ["اتجاهين", "اتجاه واحد"],
-      sidewalk: ["يوجد رصيف", "لا يوجد رصيف"],
-      width: ["< 3", "3 - 6", "6 - 10", "> 10"],
-    }),
-    []
-  );
-
-  // ✅ تحميل آخر اختيار
+  // ✅ تحميل آخر اختيار (توفير وقت)
   useEffect(() => {
     const last = localStorage.getItem("last-bin-data");
     if (last) {
-      setForm((prev: any) => ({
-        ...prev,
-        ...JSON.parse(last),
-      }));
+      const data = JSON.parse(last);
+      setWasteType(data.wasteType || null);
+      setStreetType(data.streetType || null);
+      setSidewalkStatus(data.sidewalkStatus || null);
+      setBinStatus(data.binStatus || null);
     }
   }, []);
 
-  const handleChange = (key: string, value: any) => {
-    setForm((prev: any) => ({ ...prev, value }));
+  const resetForm = () => {
+    setWasteType(null);
+    setBinStatus(null);
+    setBinCapacity(null);
+    setFillLevel(null);
+    setStreetType(null);
+    setSidewalkStatus(null);
+    setStreetWidth(null);
+    setIsHotspot(null);
+    setImage(null);
+    setNotes("");
+    setBinsCount(1);
   };
 
   const handleSubmit = async () => {
@@ -90,9 +86,21 @@ export function BinFormDrawer({
       await createBin({
         lat,
         lng,
-        accuracy: accuracy || null,
-        altitude: altitude || null,
-        ...form,
+        accuracy: accuracy === "" ? null : accuracy,
+        altitude: altitude === "" ? null : altitude,
+
+        wasteType: wasteType || undefined,
+        binStatus: binStatus || undefined,
+        binCapacity: binCapacity || undefined,
+        fillLevel: fillLevel || undefined,
+        streetType: streetType || undefined,
+        sidewalkStatus: sidewalkStatus || undefined,
+        streetWidth: streetWidth || undefined,
+        isHotspot: isHotspot || undefined,
+        binsCount: binsCount || 1,
+        area: area || undefined,
+        notes,
+        image,
       });
 
       notifications.show({
@@ -101,28 +109,24 @@ export function BinFormDrawer({
         color: "green",
       });
 
+      // ✅ حفظ آخر إدخال
       localStorage.setItem(
         "last-bin-data",
         JSON.stringify({
-          wasteType: form.wasteType,
-          streetType: form.streetType,
-          sidewalkStatus: form.sidewalkStatus,
-          binStatus: form.binStatus,
-        })
+          wasteType,
+          streetType,
+          sidewalkStatus,
+          binStatus,
+        }),
       );
 
-      setForm((prev: any) => ({
-        ...prev,
-        notes: "",
-        image: null,
-        binsCount: 1,
-      }));
-
+      resetForm();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       notifications.show({
         title: "خطأ",
-        message: error?.message || "فشل الإرسال",
+        message:
+          error instanceof Error ? error.message : "حدث خطأ أثناء الإرسال",
         color: "red",
       });
     } finally {
@@ -138,101 +142,115 @@ export function BinFormDrawer({
       position="bottom"
       size="70%"
       title="نموذج بيانات الحاوية"
-      keepMounted={false} // ✅ مهم جدًا لتقليل lag
+      overlayProps={{ opacity: 0.55, blur: 2 }}
     >
       <Stack gap="xs">
-
-        {/* الموقع */}
         <Group grow>
           <TextInput size="xs" label="خط العرض" value={lat} readOnly />
           <TextInput size="xs" label="خط الطول" value={lng} readOnly />
         </Group>
-
         <Group grow>
-          <TextInput size="xs" label="الارتفاع" value={altitude} readOnly />
-          <TextInput size="xs" label="الدقة" value={accuracy} readOnly />
+          <TextInput
+            size="xs"
+            label="الارتفاع (متر)"
+            value={altitude}
+            readOnly
+          />
+          <TextInput size="xs" label="الدقة (متر)" value={accuracy} readOnly />
         </Group>
-
-        {/* المنطقة */}
+        {/* ✅ محسن - أسرع فتح */}
         <Select
+        size="xs"
           label="المنطقة"
+          value={area}
+          onChange={setArea}
           data={areas}
-          value={form.area}
-          onChange={(v) => handleChange("area", v)}
           searchable
-          limit={8}
+          limit={10}
+          maxDropdownHeight={200}
+          clearable
         />
 
         <NumberInput
           size="xs"
           label="عدد الحاويات"
-          value={form.binsCount}
-          onChange={(v) =>
-            handleChange("binsCount", typeof v === "number" ? v : 1)
-          }
+          value={binsCount}
+          onChange={(value) => {
+            if (typeof value === "number") {
+              setBinsCount(value);
+            } else {
+              setBinsCount(1);
+            }
+          }}
           min={1}
+          max={100}
+          step={1}
+          clampBehavior="strict"
         />
 
-        <Title order={6}>🗑️ الحاوية</Title>
+        <Title order={6}>🗑️ بيانات الحاوية</Title>
 
         <SegmentedControl
-          value={form.wasteType}
-          onChange={(v) => handleChange("wasteType", v)}
-          data={options.waste}
-        />
-
-        <SegmentedControl
-          value={form.binStatus}
-          onChange={(v) => handleChange("binStatus", v)}
-          data={options.status}
+          value={wasteType || ""}
+          onChange={setWasteType}
+          data={["سكني", "تجاري", "صناعي", "مؤسسات حكومية", "استخدام مختلط"]}
         />
 
         <SegmentedControl
-          value={form.binCapacity}
-          onChange={(v) => handleChange("binCapacity", v)}
-          data={options.capacity}
+          value={binStatus || ""}
+          onChange={setBinStatus}
+          data={["جيدة", "تحتاج صيانة", "سيئة / تحتاج استبدال"]}
         />
 
         <SegmentedControl
-          value={form.fillLevel}
-          onChange={(v) => handleChange("fillLevel", v)}
-          data={options.fill}
+          value={binCapacity || ""}
+          onChange={setBinCapacity}
+          data={["120 لتر", "240 لتر", "770 لتر", "1100 لتر"]}
+        />
+
+        <SegmentedControl
+          value={fillLevel || ""}
+          onChange={setFillLevel}
+          data={["أكثر من 100%", "100%", "50%", "أقل من 50%"]}
         />
 
         <Title order={6}>🚧 الشارع</Title>
 
         <SegmentedControl
-          value={form.streetType}
-          onChange={(v) => handleChange("streetType", v)}
-          data={options.street}
+          value={streetType || ""}
+          onChange={setStreetType}
+          data={["اتجاهين", "اتجاه واحد"]}
         />
 
         <SegmentedControl
-          value={form.sidewalkStatus}
-          onChange={(v) => handleChange("sidewalkStatus", v)}
-          data={options.sidewalk}
+          value={sidewalkStatus || ""}
+          onChange={setSidewalkStatus}
+          data={["يوجد رصيف", "لا يوجد رصيف"]}
         />
 
         <SegmentedControl
-          value={form.streetWidth}
-          onChange={(v) => handleChange("streetWidth", v)}
-          data={options.width}
+          value={streetWidth || ""}
+          onChange={setStreetWidth}
+          data={["< 3", "3 - 6", "6 - 10", "> 10"]}
         />
 
-        {/* hotspot */}
+        {/* ✅ أسرع yes/no */}
+        <Title order={6}>🔥 نقطة ساخنة؟</Title>
         <Group grow>
           <Badge
             size="lg"
-            color={form.isHotspot === "نعم" ? "green" : "gray"}
-            onClick={() => handleChange("isHotspot", "نعم")}
+            color={isHotspot === "نعم" ? "green" : "blue"}
+            variant={isHotspot === "نعم" ? "light" : "outline"}
+            onClick={() => setIsHotspot("نعم")}
           >
             نعم
           </Badge>
 
           <Badge
             size="lg"
-            color={form.isHotspot === "لا" ? "red" : "gray"}
-            onClick={() => handleChange("isHotspot", "لا")}
+            color={isHotspot === "لا" ? "red" : "blue"}
+            variant={isHotspot === "لا" ? "light" : "outline"}
+            onClick={() => setIsHotspot("لا")}
           >
             لا
           </Badge>
@@ -240,22 +258,27 @@ export function BinFormDrawer({
 
         <FileInput
           size="xs"
-          label="صورة"
+          label="إرفاق صورة"
           accept="image/*"
-          value={form.image}
-          onChange={(v) => handleChange("image", v)}
+          value={image}
+          onChange={setImage}
+          clearable
         />
 
         <Textarea
           size="xs"
           label="ملاحظات"
-          value={form.notes}
-          onChange={(e) =>
-            handleChange("notes", e.currentTarget.value)
-          }
+          minRows={2}
+          value={notes}
+          onChange={(event) => setNotes(event.currentTarget.value)}
         />
 
-        <Button loading={loading} color="green" onClick={handleSubmit}>
+        <Button
+          color="green"
+          size="xs"
+          onClick={handleSubmit}
+          loading={loading}
+        >
           إرسال
         </Button>
       </Stack>
