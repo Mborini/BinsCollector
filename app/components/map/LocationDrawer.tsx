@@ -80,29 +80,41 @@ export function BinFormDrawer({
     setBinsCount(1);
   };
 
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
+ const handleSubmit = async () => {
+  if (!area) {
+    
+    notifications.show({
+      title: "تنبيه",
+      message: "يرجى اختيار المنطقة قبل الحفظ",
+      color: "orange",
+    });
+    return;
+  }
 
-      await createBin({
-        lat,
-        lng,
-        accuracy: accuracy === "" ? null : accuracy,
-        altitude: altitude === "" ? null : altitude,
+  try {
+    setLoading(true);
 
-        wasteType: wasteType || undefined,
-        binStatus: binStatus || undefined,
-        binCapacity: binCapacity || undefined,
-        fillLevel: fillLevel || undefined,
-        streetType: streetType || undefined,
-        sidewalkStatus: sidewalkStatus || undefined,
-        streetWidth: streetWidth || undefined,
-        isHotspot: isHotspot || undefined,
-        binsCount: binsCount || 1,
-        area: area || undefined,
-        notes,
-        image,
-      });
+    await createBin({
+      lat,
+      lng,
+      accuracy: accuracy === "" ? null : accuracy,
+      altitude: altitude === "" ? null : altitude,
+
+      wasteType: wasteType || undefined,
+      binStatus: binStatus || undefined,
+      binCapacity: binCapacity || undefined,
+      fillLevel: fillLevel || undefined,
+      streetType: streetType || undefined,
+      sidewalkStatus: sidewalkStatus || undefined,
+      streetWidth: streetWidth || undefined,
+      isHotspot: isHotspot || undefined,
+      binsCount: binsCount || 1,
+      area: area, // ✅ صارت مضمونة
+      notes,
+      image,
+    });
+
+   
 
       notifications.show({
         title: "تم",
@@ -160,8 +172,9 @@ export function BinFormDrawer({
           <TextInput size="xs" label="الدقة (متر)" value={accuracy} readOnly />
         </Group>
         {/* ✅ محسن - أسرع فتح */}
-        <Title order={6}>المنطقة</Title>
-        <SegmentedControl
+<Title order={6}>
+  المنطقة {!area && <span style={{ color: "red" }}>*</span>}
+</Title>        <SegmentedControl
           size="xs"
           value={area || ""}
           onChange={setArea}
@@ -272,13 +285,14 @@ export function BinFormDrawer({
         />
 
         <Button
-          color="green"
-          size="xs"
-          onClick={handleSubmit}
-          loading={loading}
-        >
-          إرسال
-        </Button>
+  color="green"
+  size="xs"
+  onClick={handleSubmit}
+  loading={loading}
+  disabled={!area} // ✅ تعطيل إذا لا يوجد منطقة
+>
+  حفظ
+</Button>
       </Stack>
     </Drawer>
   );

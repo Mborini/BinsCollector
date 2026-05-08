@@ -45,36 +45,69 @@ export function MapBoxView({
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // ✅ Geolocate (الدائرة الأصلية)
+    // ✅ Geolocate
     const geolocate = new mapboxgl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
-      trackUserLocation: true, // ✅ live دائم
+      trackUserLocation: true,
       showUserHeading: true,
     });
 
     map.addControl(geolocate, "top-right");
 
-    // ✅ تشغيل تلقائي عند فتح الماب
+    // ✅ علم الفوكس أول مرة
+    let firstFix = true;
+
+    // ✅ نحفظ الدوال الأصلية
+    const originalEaseTo = map.easeTo.bind(map);
+    const originalFlyTo = map.flyTo.bind(map);
+    const originalJumpTo = map.jumpTo.bind(map);
+
+    // ✅ geolocate event
+    geolocate.on("geolocate", (e) => {
+      const lat = e.coords.latitude;
+      const lng = e.coords.longitude;
+
+      // 🔥 أول مرة فقط → اعمل فوكس
+      if (firstFix) {
+        originalJumpTo({
+          center: [lng, lat],
+          zoom: 15,
+        });
+        firstFix = false;
+
+        // بعد أول فوكس → فعّل المنع
+        lockCamera();
+      }
+    });
+
+    // 🔥 دالة منع الحركة
+    function lockCamera() {
+      map.on("movestart", (e) => {
+        if (!e.originalEvent) {
+          map.stop();
+        }
+      });
+
+     const noop = () => {};
+
+map.easeTo = noop as any;
+map.flyTo = noop as any;
+map.jumpTo = noop as any;
+    }
+
+    // ✅ تشغيل التتبع
     map.on("load", () => {
       geolocate.trigger();
     });
 
-    // ✅ منع الماب من التحرك (إلغاء الـ auto focus)
-    map.on("movestart", (e) => {
-      // إذا الحركة مش من المستخدم → أوقفها
-      if (!e.originalEvent) {
-        map.stop();
-      }
-    });
-
-    // ✅ إذا حاول يوقف التتبع → رجعه Live
+    // ✅ إذا وقف التتبع → رجعه
     geolocate.on("trackuserlocationend", () => {
       setTimeout(() => {
         geolocate.trigger();
       }, 500);
     });
 
-    // ✅ اختيار موقع يدوي
+    // ✅ manual picking
     map.on("click", (e) => {
       if (!manualPickingRef.current) return;
 
@@ -162,7 +195,7 @@ export function MapBoxView({
             cursor: "pointer",
           }}
         >
-          ✅ تأكيد الموقع
+           تأكيد الموقع
         </button>
       )}
     </div>
