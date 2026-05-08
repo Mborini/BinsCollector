@@ -15,8 +15,10 @@ import {
   Badge,
   Input,
   NumberInput,
+  ActionIcon,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconMinus, IconPlus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
 interface Props {
@@ -181,30 +183,45 @@ export function BinFormDrawer({
           onChange={setArea}
           data={areas}
         />
+<Input.Wrapper label="عدد الحاويات" size="xs">
+  <Group grow align="center" gap="xs">
+    <ActionIcon
+      variant="light"
+      color="red"
+      size="md"
+      style={{ width: "33%" }}
+      onClick={() => setBinsCount((prev) => Math.max(1, prev - 1))}
+    >
+      <IconMinus size={20} />
+    </ActionIcon>
 
-        <NumberInput
-          size="xs"
-          label="عدد الحاويات"
-          value={binsCount}
-          onChange={(value) => {
-            if (typeof value === "number") {
-              setBinsCount(value);
-            } else {
-              setBinsCount(1);
-            }
-          }}
-          min={1}
-          max={100}
-          step={1}
-          clampBehavior="strict"
-        />
+    <Badge
+      size="xl"
+      variant="light"
+      color="blue"
+      style={{ width: "34%", textAlign: "center", fontSize: 18 }}
+    >
+      {binsCount}
+    </Badge>
+
+    <ActionIcon
+      variant="light"
+      color="green"
+      size="md"
+      style={{ width: "33%" }}
+      onClick={() => setBinsCount((prev) => Math.min(100, prev + 1))}
+    >
+      <IconPlus size={20} />
+    </ActionIcon>
+  </Group>
+</Input.Wrapper>
 
         <Title order={6}>🗑️ بيانات الحاوية</Title>
 
         <SegmentedControl
           value={wasteType || ""}
           onChange={setWasteType}
-          data={["سكني", "تجاري", "صناعي", "مؤسسات حكومية", "استخدام مختلط"]}
+          data={["سكني", "تجاري", "صناعي", "مؤسسات حكومية", " مختلط"]}
         />
 
         <SegmentedControl
