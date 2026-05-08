@@ -34,6 +34,26 @@ export function MapBoxView({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // ✅ منع خطأ SSR + تشغيل RTL فقط في المتصفح
+    if (typeof window !== "undefined") {
+      try {
+        // @ts-ignore
+        if (
+          !mapboxgl.getRTLTextPluginStatus ||
+          mapboxgl.getRTLTextPluginStatus() !== "loaded"
+        ) {
+          // @ts-ignore
+          mapboxgl.setRTLTextPlugin(
+            "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js",
+            null,
+            true
+          );
+        }
+      } catch (e) {
+        console.warn("RTL plugin error:", e);
+      }
+    }
+
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
@@ -45,7 +65,6 @@ export function MapBoxView({
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // ✅ Geolocate
     const geolocate = new mapboxgl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: true,
@@ -54,20 +73,14 @@ export function MapBoxView({
 
     map.addControl(geolocate, "top-right");
 
-    // ✅ علم الفوكس أول مرة
     let firstFix = true;
 
-    // ✅ نحفظ الدوال الأصلية
-    const originalEaseTo = map.easeTo.bind(map);
-    const originalFlyTo = map.flyTo.bind(map);
     const originalJumpTo = map.jumpTo.bind(map);
 
-    // ✅ geolocate event
     geolocate.on("geolocate", (e) => {
       const lat = e.coords.latitude;
       const lng = e.coords.longitude;
 
-      // 🔥 أول مرة فقط → اعمل فوكس
       if (firstFix) {
         originalJumpTo({
           center: [lng, lat],
@@ -75,12 +88,10 @@ export function MapBoxView({
         });
         firstFix = false;
 
-        // بعد أول فوكس → فعّل المنع
         lockCamera();
       }
     });
 
-    // 🔥 دالة منع الحركة
     function lockCamera() {
       map.on("movestart", (e) => {
         if (!e.originalEvent) {
@@ -88,26 +99,42 @@ export function MapBoxView({
         }
       });
 
-     const noop = () => {};
+      const noop = () => {};
 
-map.easeTo = noop as any;
-map.flyTo = noop as any;
-map.jumpTo = noop as any;
+      map.easeTo = noop as any;
+      map.flyTo = noop as any;
+      map.jumpTo = noop as any;
     }
 
-    // ✅ تشغيل التتبع
     map.on("load", () => {
+      // ✅ تحويل جميع أسماء الأماكن إلى عربي
+      const layers = map.getStyle().layers;
+
+      if (layers) {
+        layers.forEach((layer) => {
+          if (
+            layer.type === "symbol" &&
+            layer.layout &&
+            layer.layout["text-field"]
+          ) {
+            map.setLayoutProperty(layer.id, "text-field", [
+              "coalesce",
+              ["get", "name_ar"], // عربي
+              ["get", "name"], // fallback
+            ]);
+          }
+        });
+      }
+
       geolocate.trigger();
     });
 
-    // ✅ إذا وقف التتبع → رجعه
     geolocate.on("trackuserlocationend", () => {
       setTimeout(() => {
         geolocate.trigger();
       }, 500);
     });
 
-    // ✅ manual picking
     map.on("click", (e) => {
       if (!manualPickingRef.current) return;
 
@@ -195,7 +222,7 @@ map.jumpTo = noop as any;
             cursor: "pointer",
           }}
         >
-           تأكيد الموقع
+          تأكيد الموقع
         </button>
       )}
     </div>
