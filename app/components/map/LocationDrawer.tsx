@@ -150,7 +150,11 @@ export function BinFormDrawer({
       setLoading(false);
     }
   };
-
+useEffect(() => {
+  if (areas.length > 0) {
+    setArea(areas[0].value);
+  }
+}, [areas]);
   return (
     <Drawer
       dir="rtl"
@@ -180,11 +184,12 @@ export function BinFormDrawer({
           المنطقة {!area && <span style={{ color: "red" }}>*</span>}
         </Title>{" "}
         <SegmentedControl
-          size="xs"
-          value={area || ""}
-          onChange={setArea}
-          data={areas}
-        />
+  size="xs"
+  value={area || ""}
+  onChange={setArea}
+  data={areas}
+  disabled
+/>
         <Input.Wrapper label="عدد الحاويات" size="xs">
           <Group grow align="center" gap="xs">
             <ActionIcon
