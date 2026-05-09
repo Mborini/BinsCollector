@@ -13,7 +13,7 @@ interface Props {
   zone: {
     id: number;
     name: string;
-    area_name: string;
+   
   };
 }
 
