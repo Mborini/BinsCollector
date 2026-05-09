@@ -1,7 +1,11 @@
 "use client";
 
 import { Card, Text, Button, Stack, Group } from "@mantine/core";
-import { IconMapPin, IconDownload } from "@tabler/icons-react";
+import {
+  IconMapPin,
+  IconDownload,
+  IconWorldDownload,
+} from "@tabler/icons-react";
 import { useState } from "react";
 import { useMantineTheme } from "@mantine/core";
 
@@ -9,6 +13,7 @@ interface Props {
   zone: {
     id: number;
     name: string;
+    area_name: string;
   };
 }
 
@@ -16,11 +21,11 @@ export default function BinsCard({ zone }: Props) {
   const [loading, setLoading] = useState(false);
   const theme = useMantineTheme();
 
-  const handleDownload = async () => {
+  const handleDownload = async (type: "excel" | "kml") => {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/export-bins?area=${zone.id}`);
+      const res = await fetch(`/api/export-bins?area=${zone.id}&type=${type}`);
 
       if (!res.ok) throw new Error("Download failed");
 
@@ -30,10 +35,9 @@ export default function BinsCard({ zone }: Props) {
       const a = document.createElement("a");
       a.href = url;
 
-      const now = new Date();
-      const formatted = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${now.getMinutes()}`;
+      const ext = type === "kml" ? "kml" : "xlsx";
 
-      a.download = `bins-${zone.id}-${formatted}.xlsx`;
+      a.download = `bins-${zone.name}.${ext}`;
       a.click();
 
       window.URL.revokeObjectURL(url);
@@ -52,15 +56,6 @@ export default function BinsCard({ zone }: Props) {
       style={{
         border: `1px solid ${theme.colors.gray[2]}`,
         textAlign: "center",
-        transition: "all 0.3s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "scale(1.03)";
-        e.currentTarget.style.boxShadow = theme.shadows.md;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "scale(1)";
-        e.currentTarget.style.boxShadow = theme.shadows.sm;
       }}
     >
       <Stack gap="sm">
@@ -73,22 +68,35 @@ export default function BinsCard({ zone }: Props) {
         </Text>
 
         <Text size="sm" c="dimmed">
-          تحميل بيانات الحاويات الخاصة بالمنطقة
+          تحميل بيانات الحاويات
         </Text>
+       <Group grow>
+          {/* Excel */}
+          <Button
+            leftSection={<IconDownload size={16} />}
+            loading={loading}
+            radius="xl"
+            variant="light"
+            color="green"
+            onClick={() => handleDownload("excel")}
+            fullWidth
+          >
+            Excel
+          </Button>
 
-        <Button
-          leftSection={<IconDownload size={16} />}
-          loading={loading}
-          radius="xl"
-          variant="light"
-          color="green"
-          onClick={handleDownload}
-          fullWidth
-        >
-          تحميل Excel
-        </Button>
+          {/* KML */}
+          <Button
+            leftSection={<IconWorldDownload stroke={2} />}
+            radius="xl"
+            variant="light"
+            color="blue"
+            onClick={() => handleDownload("kml")}
+            fullWidth
+          >
+            KML
+          </Button>
+        </Group>
       </Stack>
     </Card>
   );
 }
-``
