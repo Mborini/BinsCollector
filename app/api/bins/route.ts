@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     const result = await pool.query(`
-      SELECT lat, lng ,bin_capacity FROM bins
+      SELECT id, lat, lng ,bin_capacity FROM bins
     `);
 
     return NextResponse.json(result.rows);

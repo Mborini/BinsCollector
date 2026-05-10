@@ -67,13 +67,18 @@ img.src = "/recycling-bin.png";
 img.style.width = "35px";
 img.style.height = "35px";
 
-// النص (capacity)
 const label = document.createElement("span");
-label.innerText = `${bin.bin_capacity ?? ""}`;
+
+label.innerHTML = `
+  ${bin.bin_capacity ?? ""} 
+  <span style="color: red;">
+    (id:${bin.id ?? ""})
+  </span>
+`;
+
 label.style.fontSize = "12px";
 label.style.color = "#000";
-
-
+label.style.whiteSpace = "nowrap";
 // إضافة العناصر
 el.appendChild(img);
 el.appendChild(label);
